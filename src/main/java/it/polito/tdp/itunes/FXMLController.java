@@ -5,7 +5,11 @@
 package it.polito.tdp.itunes;
 
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Set;
+
+import it.polito.tdp.itunes.model.Album;
 import it.polito.tdp.itunes.model.Model;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -34,7 +38,7 @@ public class FXMLController {
     private Button btnSet; // Value injected by FXMLLoader
 
     @FXML // fx:id="cmbA1"
-    private ComboBox<?> cmbA1; // Value injected by FXMLLoader
+    private ComboBox<Album> cmbA1; // Value injected by FXMLLoader
 
     @FXML // fx:id="txtDurata"
     private TextField txtDurata; // Value injected by FXMLLoader
@@ -47,12 +51,38 @@ public class FXMLController {
 
     @FXML
     void doComponente(ActionEvent event) {
+    	Album a1 = this.cmbA1.getValue();
+    	if(a1 == null) {
+    		this.txtResult.appendText("Seleziona un album");
+    		return;  }
     	
+    	Set<Album> connessa = this.model.getComponente(a1);
+    	double somma = 0.0;
+    	for(Album a: connessa) {
+    		somma += a.getDurata();  }
+    	txtResult.appendText("Dimensione componente: " + connessa.size() + "\n");
+    	txtResult.appendText("Durata totale: "+ somma + "\n");
     }
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
     	
+    	String durataS = this.txtDurata.getText();
+    	if(durataS.equals("")) {
+    		txtResult.appendText("Inserire il valore della durata d");
+    		return;   }
+    	Double duration;
+    	try {
+    		duration = Double.parseDouble(durataS);
+    	} catch(NumberFormatException n) {
+    		txtResult.appendText("La durata è un valore numerico!");  
+    		return; }
+   
+    	model.creaGrafo(duration);
+    	
+    	List<Album> albums = model.getAlbums();
+    	this.cmbA1.getItems().clear();
+    	this.cmbA1.getItems().addAll(albums);
     }
 
     @FXML
@@ -69,7 +99,6 @@ public class FXMLController {
         assert txtDurata != null : "fx:id=\"txtDurata\" was not injected: check your FXML file 'Scene.fxml'.";
         assert txtResult != null : "fx:id=\"txtResult\" was not injected: check your FXML file 'Scene.fxml'.";
         assert txtX != null : "fx:id=\"txtX\" was not injected: check your FXML file 'Scene.fxml'.";
-
     }
     
     public void setModel(Model model) {
